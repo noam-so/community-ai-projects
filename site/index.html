@@ -93,7 +93,67 @@
 
     .status { color: var(--muted); }
 
+    /* Opens the principles dialog. A button, styled to read as a link in the sentence. */
+    .text-link {
+      font: inherit;
+      color: inherit;
+      background: none;
+      border: 0;
+      padding: 0;
+      cursor: pointer;
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 0.2em;
+    }
+    .text-link:hover { text-decoration-thickness: 2px; }
+
+    .principles {
+      width: min(46rem, calc(100% - 2rem));
+      max-height: calc(100% - 2rem);
+      padding: 0;
+      border: 1px solid var(--rule);
+      border-radius: 6px;
+      background: var(--paper);
+      color: var(--ink);
+    }
+    .principles::backdrop { background: rgb(10 20 22 / 0.55); }
+    body:has(.principles[open]) { overflow: hidden; }
+    .principles-inner { padding: 2rem 1.75rem 2.25rem; }
+    .principles-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+    }
+    .principles h2 { font-size: 1.75rem; line-height: 1.15; margin: 0; }
+    .close {
+      font: inherit;
+      font-weight: 700;
+      color: var(--ink);
+      background: none;
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+      padding: 0.25rem 0.75rem;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .close:hover { border-color: var(--muted); }
+    .principle-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+      gap: 1.75rem 2rem;
+    }
+    .principle-list li { border-top: 1px solid var(--rule); padding-top: 0.875rem; }
+    .principle-list h3 { font-size: 1.1875rem; margin: 0 0 0.375rem; }
+    .principle-list p { margin: 0; }
+
     @media (max-width: 30rem) {
+      .principles-inner { padding: 1.5rem 1.25rem 1.75rem; }
+      .principles h2 { font-size: 1.5rem; }
       .page { padding-top: 2.5rem; }
       .project { padding-left: 1rem; border-left-width: 0.375rem; }
       .project h2 { font-size: 1.75rem; }
@@ -112,9 +172,44 @@
   <div class="page">
     <header>
       <h1>Community AI Projects</h1>
-      <p class="lede">Field notes on AI projects in the UK: who made each one, what it is, and how it fits a set of community principles.</p>
+      <p class="lede">Field notes on AI projects in the UK: who made each one, what it is, and how it fits a <button type="button" class="text-link" id="open-principles" aria-haspopup="dialog">set of community principles</button>.</p>
       <p class="note">Working drafts, published to test the format. They’re not endorsements or ratings.</p>
     </header>
+
+    <dialog class="principles" id="principles" aria-labelledby="principles-title">
+      <div class="principles-inner">
+        <div class="principles-head">
+          <h2 id="principles-title">A draft set of community AI principles</h2>
+          <button type="button" class="close" id="close-principles">Close</button>
+        </div>
+        <ul class="principle-list">
+          <li>
+            <h3>Community control</h3>
+            <p>Communities hold a real stake in the tool and decision rights, including the power to change it, pause it, or switch it off.</p>
+          </li>
+          <li>
+            <h3>Starts with need</h3>
+            <p>The problem comes from the community. AI is used where it is the right answer, and the tool is built to fit need and context.</p>
+          </li>
+          <li>
+            <h3>Data stewardship</h3>
+            <p>Community data is held on the community’s terms and never becomes someone else’s asset.</p>
+          </li>
+          <li>
+            <h3>Value returns</h3>
+            <p>Money, data, insight and capability flow back to the community rather than out to a vendor, and nothing traps them in.</p>
+          </li>
+          <li>
+            <h3>Open and accountable</h3>
+            <p>Code, methods and learning are shared openly, and risks, failures and harms are published.</p>
+          </li>
+          <li>
+            <h3>Light footprint</h3>
+            <p>Uses a relatively small and economical approach that does the job well, considering both people and planet.</p>
+          </li>
+        </ul>
+      </div>
+    </dialog>
 
     <main id="projects" aria-live="polite">
       <p class="status">Loading projects…</p>
@@ -168,6 +263,14 @@
     }
 
     load();
+
+    // Principles dialog: Escape closes it natively; this adds the button and a click outside.
+    const principles = document.getElementById("principles");
+    document.getElementById("open-principles").addEventListener("click", () => principles.showModal());
+    document.getElementById("close-principles").addEventListener("click", () => principles.close());
+    principles.addEventListener("click", (event) => {
+      if (event.target === principles) principles.close();
+    });
   </script>
 </body>
 </html>
