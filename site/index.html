@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Community AI Projects</title>
+  <meta name="description" content="Field notes on AI projects in the UK: who made each one, what it is, and how it fits a set of community principles.">
+  <!-- Asks search engines not to list this test page. Remove when it's ready to be found. -->
+  <meta name="robots" content="noindex">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --paper: #F2F5F4;
+      --ink: #17282B;
+      --muted: #4E6266;
+      --rule: #D0D9D7;
+      --focus: #245E7E;
+
+      /* One colour per product type. Families, not tiers: no colour outranks another. */
+      --type-domain-assistant: #245E7E;
+      --type-shared-resource: #4F6B1F;
+      --type-general-assistant: #7D3F70;
+      --type-automated-publishing: #8A5A00;
+      --type-infrastructure: #45526A;
+      --type-specialist-processing-tool: #8C3B2E;
+      --type-unknown: #4E6266;
+
+      color-scheme: light dark;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --paper: #13191B;
+        --ink: #E2EAE8;
+        --muted: #9DB0B3;
+        --rule: #2B3739;
+        --focus: #7DB9D9;
+        --type-domain-assistant: #7DB9D9;
+        --type-shared-resource: #A9C46A;
+        --type-general-assistant: #D59BC8;
+        --type-automated-publishing: #E2B65C;
+        --type-infrastructure: #A7B4CC;
+        --type-specialist-processing-tool: #E59A8C;
+        --type-unknown: #9DB0B3;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "Atkinson Hyperlegible Next", "Atkinson Hyperlegible", system-ui, sans-serif;
+      font-size: 1.0625rem;
+      line-height: 1.6;
+    }
+    .page {
+      max-width: 42rem;
+      margin: 0 auto;
+      padding: 4rem 1.25rem 3rem;
+    }
+    a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+    a:hover { text-decoration-thickness: 2px; }
+    :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; border-radius: 2px; }
+
+    header { margin-bottom: 3.5rem; }
+    h1 {
+      font-size: clamp(2.25rem, 7vw, 3.25rem);
+      line-height: 1.05;
+      letter-spacing: -0.015em;
+      margin: 0 0 1.25rem;
+    }
+    .lede { font-size: 1.25rem; line-height: 1.5; margin: 0 0 0.75rem; max-width: 34em; }
+    .note { color: var(--muted); margin: 0; }
+
+    .project {
+      --type: var(--type-unknown);
+      border-left: 0.5rem solid var(--type);
+      padding: 0.25rem 0 0.25rem 1.5rem;
+      margin: 0 0 3.5rem;
+    }
+    .project h2 { font-size: 2rem; line-height: 1.15; margin: 0 0 0.25rem; }
+    .project h2 a { text-decoration: none; }
+    .project h2 a:hover { text-decoration: underline; }
+    .type { color: var(--type); font-weight: 700; margin: 0 0 1rem; }
+    .description { font-size: 1.1875rem; line-height: 1.5; margin: 0 0 1rem; }
+    .creator { color: var(--muted); margin: 0 0 1.5rem; }
+    .creator a { color: var(--ink); }
+    .body h3 { font-size: 1.0625rem; margin: 0 0 0.25rem; }
+    .body p { margin: 0 0 1rem; }
+
+    .status { color: var(--muted); }
+
+    @media (max-width: 30rem) {
+      .page { padding-top: 2.5rem; }
+      .project { padding-left: 1rem; border-left-width: 0.375rem; }
+      .project h2 { font-size: 1.75rem; }
+    }
+
+    footer {
+      border-top: 1px solid var(--rule);
+      padding-top: 1.25rem;
+      color: var(--muted);
+      font-size: 0.9375rem;
+    }
+    footer p { margin: 0 0 0.5rem; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <h1>Community AI Projects</h1>
+      <p class="lede">Field notes on AI projects in the UK: who made each one, what it is, and how it fits a set of community principles.</p>
+      <p class="note">Working drafts, published to test the format. They’re not endorsements or ratings.</p>
+    </header>
+
+    <main id="projects" aria-live="polite">
+      <p class="status">Loading projects…</p>
+    </main>
+
+    <footer>
+      <p>Each project is a Markdown file in the <a href="https://github.com/noam-so/community-ai-projects">GitHub repository</a>. The page rebuilds whenever a file changes.</p>
+      <p id="built"></p>
+    </footer>
+  </div>
+
+  <script>
+    const escape = (value) => String(value ?? "").replace(/[&<>"']/g, (c) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+    })[c]);
+
+    const typeClass = (type) =>
+      "var(--type-" + String(type || "unknown").toLowerCase().replace(/[^a-z0-9]+/g, "-") + ", var(--type-unknown))";
+
+    const link = (text, url) =>
+      url ? `<a href="${escape(url)}">${escape(text)}</a>` : escape(text);
+
+    function render(project) {
+      return `
+        <article class="project" id="${escape(project.slug)}" style="--type: ${typeClass(project.product_type)}">
+          <h2>${link(project.title, project.url)}</h2>
+          <p class="type">${escape(project.product_type)}</p>
+          <p class="description">${escape(project.description)}</p>
+          <p class="creator">Made by ${link(project.creator, project.creator_url)}</p>
+          <div class="body">${project.body_html}</div>
+        </article>`;
+    }
+
+    async function load() {
+      const main = document.getElementById("projects");
+      try {
+        const response = await fetch("projects.json", { cache: "no-store" });
+        if (!response.ok) throw new Error(`the server answered ${response.status}`);
+        const feed = await response.json();
+
+        main.innerHTML = feed.projects.length
+          ? feed.projects.map(render).join("")
+          : `<p class="status">No projects yet. Add a Markdown file to the projects folder to show one here.</p>`;
+
+        const built = new Date(feed.meta.built_at);
+        document.getElementById("built").textContent =
+          "Last built " + built.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) + ".";
+      } catch (error) {
+        main.innerHTML = `<p class="status">Projects couldn’t load: ${escape(error.message)}. If you opened this file straight from your computer, run a local server instead (see the README).</p>`;
+      }
+    }
+
+    load();
+  </script>
+</body>
+</html>
